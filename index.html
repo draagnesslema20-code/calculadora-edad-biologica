@@ -1,1 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Edad Biológica - Dra. Inés Angélica</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --royal-blue: #1a3a5c;
+            --rose-gold: #c9917e;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--white);
+            color: var(--royal-blue);
+            line-height: 1.6;
+        }
+        .hidden {
+            display: none !important;
+        }
+      .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .dna-helix {
+            position: absolute;
+            width: 200px;
+            height: 400px;
+            opacity: 0.08;
+            animation: rotate 20s linear infinite;
+        }
+        .dna-helix::before,
+        .dna-helix::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--royal-blue), var(--rose-gold));
+            border-radius: 2px;
+        }
+        .dna-helix::before {
+            left: 20%;
+            animation: wave 2s ease-in-out infinite;
+        }
+        .dna-helix::after {
+            right: 20%;
+            animation: wave 2s ease-in-out infinite 1s;
+        }
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(20px); }
+        }
+        .hero-content {
+            max-width: 700px;
+            z-index: 1;
+        }
+        .logo-container {
+            margin-bottom: 3rem;
+        }
+        .logo-img {
+            width: 200px;
+            height: auto;
+            margin: 0 auto 1rem;
+            display: block;
+        }
+        .logo h1 {
+            font-size: 2.5rem;
+            color: var(--royal-blue);
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            color: var(--rose-gold);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #666;
+        }
+        .cta-btn {
+            background: var(--rose-gold);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+        }
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(201, 145, 126, 0.3);
+        }
+      .quiz {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+        .progress-bar {
+            background: var(--light-gray);
+            height: 60px;
+            border-radius: 10px;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--royal-blue), var(--rose-gold));
+            height: 100%;
+            transition: width 0.5s ease;
+            width: 10%;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 600;
+            color: var(--royal-blue);
+        }
+        .question-container {
+            max-width: 700px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .question-text {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .option {
+            background: white;
+            border: 2px solid var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        .option:hover {
+            border-color: var(--rose-gold);
+            transform: translateX(5px);
+        }
+        .option.selected {
+            border-color: var(--royal-blue);
+            background: rgba(26, 58, 92, 0.05);
+        }
+        .next-btn {
+            margin: 2rem auto 0;
+            display: block;
+            background: var(--royal-blue);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .next-btn:hover {
+            transform: scale(1.05);
+        }
+        .email-capture {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        .email-capture h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .email-capture p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #666;
+        }
+        #emailInput {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 50px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        #emailInput:focus {
+            outline: none;
+            border-color: var(--rose-gold);
+        }
+      .calculating {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .calculating h2 {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            color: var(--royal-blue);
+        }
+        .spinning {
+            animation: rotate 3s linear infinite;
+            opacity: 0.6;
+        }
+        .results {
+            min-height: 100vh;
+            padding: 3rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .results h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .result-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .bio-age, .chrono-age {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            background: var(--light-gray);
+        }
+        .bio-age {
+            background: linear-gradient(135deg, var(--rose-gold), #d4a894);
+            color: white;
+        }
+        .bio-age .number {
+            display: block;
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+        .chrono-age .number {
+            display: block;
+            font-size: 3rem;
+            font-weight: 600;
+            margin: 1rem 0;
+            color: var(--royal-blue);
+        }
+        .comparison-chart {
+            margin: 3rem 0;
+        }
+        .bar {
+            margin-bottom: 2rem;
+        }
+        .bar-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .bar-fill {
+            height: 40px;
+            border-radius: 20px;
+            transition: width 1.5s ease;
+        }
+        .chrono-bar .bar-fill {
+            background: var(--royal-blue);
+        }
+        .bio-bar .bar-fill {
+            background: var(--rose-gold);
+        }
+        .result-message {
+            text-align: center;
+            font-size: 1.3rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: 10px;
+        }
+        .social-cta {
+            margin-top: 3rem;
+            text-align: center;
+            padding: 2rem;
+            background: var(--light-gray);
+            border-radius: 15px;
+        }
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .social-icons a {
+            color: var(--royal-blue);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: white;
+            transition: transform 0.3s;
+        }
+        .social-icons a:hover {
+            transform: translateY(-3px);
+        }
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            .result-box {
+                grid-template-columns: 1fr;
+            }
+            .bio-age .number {
+                font-size: 3rem;
+            }
+            .logo-img {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+  <section id="hero" class="hero">
+        <div class="dna-helix"></div>
+        <div class="hero-content">
+            <div class="logo-container">
+                <div class="logo">
+                    <h1>Dra. Inés Angélica</h1>
+                    <p class="tagline">GENÓMICA | LONGEVIDAD</p>
+                </div>
+            </div>
+            <h2 class="hero-title">Descubre Cuántos Años Tiene Realmente Tu Cuerpo en 2 Minutos</h2>
+            <p class="hero-subtitle">Responde 10 preguntas y descubre si estás envejeciendo más rápido de lo normal</p>
+            <button id="startBtn" class="cta-btn">Empezar Test Gratis</button>
+        </div>
+    </section>
 
+    <section id="quiz" class="quiz hidden">
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+            <span class="progress-text">Pregunta 1 de 10</span>
+        </div>
+        <div class="question-container">
+            <h3 class="question-text"></h3>
+            <div class="options"></div>
+            <button id="nextBtn" class="next-btn hidden">Siguiente</button>
+        </div>
+    </section>
+
+    <section id="emailCapture" class="email-capture hidden">
+        <h2>¡Casi listo!</h2>
+        <p>Ingresa tu email para recibir tu análisis completo</p>
+        <form action="https://formsubmit.co/draagnesslema20@gmail.com" method="POST" id="emailForm">
+            <input type="hidden" name="_subject" value="Nuevo Lead - Calculadora Edad Biológica">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_next" value="https://calculadora-edad-biologica.vercel.app/#results">
+            <input type="email" id="emailInput" name="email" placeholder="tu@email.com" required>
+            <input type="hidden" id="hiddenData" name="datos">
+            <button type="submit" class="cta-btn">Ver Mi Resultado</button>
+        </form>
+    </section>
+
+    <section id="calculating" class="calculating hidden">
+        <div class="dna-helix spinning"></div>
+        <h2>Analizando tus respuestas...</h2>
+    </section>
+
+    <section id="results" class="results hidden">
+        <h2>Tu Resultado</h2>
+        <div class="result-box">
+            <div class="bio-age">
+                <span class="label">Edad Biológica</span>
+                <span class="number" id="bioAge">0</span>
+                <span class="unit">años</span>
+            </div>
+            <div class="chrono-age">
+                <span class="label">Edad Cronológica</span>
+                <span class="number" id="chronoAge">0</span>
+                <span class="unit">años</span>
+            </div>
+        </div>
+        <div class="comparison-chart">
+            <div class="bar chrono-bar">
+                <span class="bar-label">Cronológica</span>
+                <div class="bar-fill" id="chronoBar"></div>
+            </div>
+            <div class="bar bio-bar">
+                <span class="bar-label">Biológica</span>
+                <div class="bar-fill" id="bioBar"></div>
+            </div>
+        </div>
+        <p class="result-message" id="resultMessage"></p>
+        <button id="downloadBtn" class="cta-btn">Descargar Mi Protocolo de 7 Días (PDF)</button>
+        <div class="social-cta">
+            <p>Sígueme para más contenido sobre longevidad:</p>
+            <div class="social-icons">
+                <a href="https://www.youtube.com/@INESANGELICAGL" target="_blank">📺 YouTube</a>
+                <a href="https://www.instagram.com/dra_inesangelica" target="_blank">📷 Instagram</a>
+                <a href="https://www.tiktok.com/@dra.inesangelicagl" target="_blank">🎵 TikTok</a>
+                <a href="https://www.facebook.com/profile.php?id=61589302224975" target="_blank">👥 Facebook</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+      const questions = [
+    {
+        id: 1,
+        text: "¿Cuál es tu edad actual?",
+        options: [
+            { text: "18-29 años", value: "18-29", impact: 0 },
+            { text: "30-39 años", value: "30-39", impact: 0 },
+            { text: "40-49 años", value: "40-49", impact: 0 },
+            { text: "50-59 años", value: "50-59", impact: 0 },
+            { text: "60+ años", value: "60+", impact: 0 }
+        ]
+    },
+    {
+        id: 2,
+        text: "¿Cuántas horas duermes en promedio por noche?",
+        options: [
+            { text: "Menos de 5 horas", impact: -5 },
+            { text: "5-6 horas", impact: -2 },
+            { text: "7-8 horas (ÓPTIMO)", impact: 3 },
+            { text: "9+ horas", impact: -1 }
+        ]
+    },
+    {
+        id: 3,
+        text: "¿Con qué frecuencia realizas actividad física intensa?",
+        options: [
+            { text: "Nunca o casi nunca", impact: -4 },
+            { text: "1-2 veces por semana", impact: -1 },
+            { text: "3-4 veces por semana", impact: 4 },
+            { text: "5+ veces por semana", impact: 6 }
+        ]
+    },
+    {
+        id: 4,
+        text: "¿Con qué frecuencia consumes alimentos ultra-procesados?",
+        options: [
+            { text: "Diariamente o casi todos los días", impact: -6 },
+            { text: "3-4 veces por semana", impact: -3 },
+            { text: "1-2 veces por semana", impact: -1 },
+            { text: "Raramente o nunca", impact: 4 }
+        ]
+    },
+    {
+        id: 5,
+        text: "¿Cuántas porciones de vegetales y frutas consumes al día?",
+        options: [
+            { text: "0-1 porciones", impact: -3 },
+            { text: "2-3 porciones", impact: 1 },
+            { text: "4-5 porciones", impact: 3 },
+            { text: "6+ porciones", impact: 5 }
+        ]
+    },
+    {
+        id: 6,
+        text: "¿Fumas o has fumado en los últimos 5 años?",
+        options: [
+            { text: "Fumo actualmente", impact: -8 },
+            { text: "Dejé hace menos de 2 años", impact: -4 },
+            { text: "Dejé hace 2-5 años", impact: -2 },
+            { text: "Nunca he fumado", impact: 2 }
+        ]
+    },
+    {
+        id: 7,
+        text: "¿Cómo calificarías tu nivel de estrés diario?",
+        options: [
+            { text: "8-10 (Estrés severo)", impact: -5 },
+            { text: "6-7 (Estrés moderado-alto)", impact: -3 },
+            { text: "4-5 (Estrés moderado)", impact: -1 },
+            { text: "1-3 (Estrés bajo)", impact: 3 }
+        ]
+    },
+    {
+        id: 8,
+        text: "¿Practicas ayuno intermitente?",
+        options: [
+            { text: "Sí, regularmente (16/8 o similar)", impact: 4 },
+            { text: "A veces, de forma irregular", impact: 2 },
+            { text: "No, como todo el día", impact: 0 }
+        ]
+    },
+    {
+        id: 9,
+        text: "¿Con qué frecuencia consumes bebidas alcohólicas?",
+        options: [
+            { text: "Diariamente o casi todos los días", impact: -4 },
+            { text: "3-5 veces por semana", impact: -2 },
+            { text: "1-2 veces por semana", impact: 1 },
+            { text: "Raramente o nunca", impact: 3 }
+        ]
+    },
+    {
+        id: 10,
+        text: "¿Cuál es tu peso en relación a tu estatura?",
+        options: [
+            { text: "Tengo obesidad (IMC >30)", impact: -5 },
+            { text: "Tengo sobrepeso (IMC 25-30)", impact: -2 },
+            { text: "Peso saludable (IMC 18.5-24.9)", impact: 3 },
+            { text: "Bajo peso (IMC <18.5)", impact: -1 }
+        ]
+    }
+];
+
+let currentQuestion = 0;
+let answers = [];
+let userEmail = '';
+let chronologicalAge = 0;
+
+const hero = document.getElementById('hero');
+const quiz = document.getElementById('quiz');
+const emailCapture = document.getElementById('emailCapture');
+const calculating = document.getElementById('calculating');
+const results = document.getElementById('results');
+const startBtn = document.getElementById('startBtn');
+const nextBtn = document.getElementById('nextBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const emailForm = document.getElementById('emailForm');
+      startBtn.addEventListener('click', startQuiz);
+nextBtn.addEventListener('click', nextQuestion);
+downloadBtn.addEventListener('click', generatePDF);
+
+emailForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    userEmail = document.getElementById('emailInput').value;
+    document.getElementById('hiddenData').value = JSON.stringify(answers);
+    
+    emailCapture.classList.add('hidden');
+    calculating.classList.remove('hidden');
+    
+    setTimeout(showResults, 3000);
+});
+
+function startQuiz() {
+    hero.classList.add('hidden');
+    quiz.classList.remove('hidden');
+    showQuestion();
+}
+
+function showQuestion() {
+    const question = questions[currentQuestion];
+    const progressFill = document.querySelector('.progress-fill');
+    const progressText = document.querySelector('.progress-text');
+    const questionText = document.querySelector('.question-text');
+    const optionsContainer = document.querySelector('.options');
+    
+    const progress = ((currentQuestion + 1) / questions.length) * 100;
+    progressFill.style.width = progress + '%';
+    progressText.textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+    
+    questionText.textContent = question.text;
+    
+    optionsContainer.innerHTML = '';
+    question.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = option.text;
+        optionDiv.addEventListener('click', () => selectOption(index, optionDiv));
+        optionsContainer.appendChild(optionDiv);
+    });
+    
+    nextBtn.classList.add('hidden');
+}
+
+function selectOption(index, element) {
+    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+    element.classList.add('selected');
+    
+    const question = questions[currentQuestion];
+    answers[currentQuestion] = {
+        questionId: question.id,
+        selectedIndex: index,
+        impact: question.options[index].impact
+    };
+    
+    if (currentQuestion === 0) {
+        const ageRange = question.options[index].value;
+        const ages = {'18-29': 24, '30-39': 35, '40-49': 45, '50-59': 55, '60+': 65};
+        chronologicalAge = ages[ageRange] || 45;
+    }
+    
+    nextBtn.classList.remove('hidden');
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    
+    if (currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        quiz.classList.add('hidden');
+        emailCapture.classList.remove('hidden');
+    }
+}
+
+function showResults() {
+    let totalImpact = 0;
+    answers.forEach(answer => {
+        totalImpact += answer.impact;
+    });
+    
+    const biologicalAge = Math.max(18, chronologicalAge + totalImpact);
+    const difference = chronologicalAge - biologicalAge;
+    
+    calculating.classList.add('hidden');
+    results.classList.remove('hidden');
+    
+    document.getElementById('bioAge').textContent = Math.round(biologicalAge);
+    document.getElementById('chronoAge').textContent = chronologicalAge;
+    
+    const maxAge = Math.max(biologicalAge, chronologicalAge);
+    setTimeout(() => {
+        document.getElementById('chronoBar').style.width = (chronologicalAge / maxAge * 100) + '%';
+        document.getElementById('bioBar').style.width = (biologicalAge / maxAge * 100) + '%';
+    }, 500);
+    
+    let message = '';
+    if (difference > 5) {
+        message = `¡Felicidades! Tu cuerpo está ${Math.abs(Math.round(difference))} años más joven que tu edad real.`;
+    } else if (difference > 0) {
+        message = `Tu edad biológica es ligeramente menor que tu edad cronológica.`;
+    } else if (difference === 0) {
+        message = `Tu edad biológica coincide con tu edad cronológica.`;
+    } else {
+        message = `Tu cuerpo está envejeciendo ${Math.abs(Math.round(difference))} años más rápido. ¡Pero tenemos un plan!`;
+    }
+    
+    document.getElementById('resultMessage').textContent = message;
+}
+
+function generatePDF() {
+    alert('PDF generado. Revisa tu email: ' + userEmail);
+}
+    </script>
+</body>
+</html>
